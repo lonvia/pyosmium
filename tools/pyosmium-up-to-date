@@ -39,7 +39,7 @@ from sys import version_info as python_version
 from osmium.replication import server as rserv
 from osmium.replication.utils import get_replication_header
 from osmium.replication import newest_change_from_file
-from osmium.version import pyosmium_release
+import osmium.version
 from textwrap import dedent as msgfmt
 from tempfile import mktemp
 import os.path
@@ -116,7 +116,7 @@ def update_from_custom_server(url, seq, ts, options):
     else:
         ofname = outfile
 
-    extra_headers = { 'generator' : 'pyosmium-up-to-date/' + pyosmium_release }
+    extra_headers = { 'generator' : 'pyosmium-up-to-date/' + osmium.version.pyosmium_release }
     outseqs = svr.apply_diffs_to_file(infile, ofname, startseq,
                                      max_size=options.outsize*1024,
                                      extra_headers=extra_headers,
@@ -209,6 +209,8 @@ def get_arg_parser(from_main=False):
                               received cookies will be written to.""")
     parser.add_argument('--socket-timeout', dest='socket_timeout', type=int, default=60,
                         help='Set timeout for file downloads.')
+    parser.add_argument('--version', dest='show_version', action='store_true',
+                        help='Show program version')
 
     return parser
 
@@ -220,6 +222,12 @@ if __name__ == '__main__':
                         format='%(asctime)s %(levelname)s: %(message)s')
 
     options = get_arg_parser(from_main=True).parse_args()
+
+    if options.show_version:
+        print("pyosmium %s (libosmium %s)"
+              % (osmium.version.pyosmium_release, osmium.version.libosmium_version))
+        exit(0)
+
     log.setLevel(max(3 - options.loglevel, 0) * 10)
 
     socket.setdefaulttimeout(options.socket_timeout)
