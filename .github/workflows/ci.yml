@@ -33,4 +33,4 @@ jobs:
             - name: Run tests
               run: python3 run_tests.py
               shell: bash
-              working_directory: test
+              working-directory: test
