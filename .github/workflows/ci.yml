@@ -37,6 +37,7 @@ jobs:
 
     build-ubuntu-1604:
         runs-on: ubuntu-16.04
+        if: ${{ false }}
 
         strategy:
             matrix:
@@ -127,7 +128,7 @@ jobs:
                   python-version: 3
 
             - name: Install packages
-              run: homebrew install geos
+              run: brew install geos
               shell: bash
 
             - uses: ./.github/actions/install-dependencies
