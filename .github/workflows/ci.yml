@@ -54,7 +54,7 @@ jobs:
               env:
                 CC: gcc
                 CXX: g++
-              if: {{ matrix.compiler == 'gcc' }}
+              if: ${{ matrix.compiler == 'gcc' }}
 
             - name: Build package
               run: python setup.py build
@@ -62,7 +62,7 @@ jobs:
               env:
                 CC: clang
                 CXX: clang++
-              if: {{ matrix.compiler == 'clang' }}
+              if: ${{ matrix.compiler == 'clang' }}
 
             - name: Run tests
               run: python run_tests.py
