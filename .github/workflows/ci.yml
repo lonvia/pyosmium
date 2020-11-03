@@ -128,7 +128,7 @@ jobs:
                   python-version: 3
 
             - name: Install packages
-              run: brew install geos
+              run: brew install boost geos
               shell: bash
 
             - uses: ./.github/actions/install-dependencies
