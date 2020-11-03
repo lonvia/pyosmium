@@ -77,6 +77,7 @@ jobs:
 
     build-ubuntu-2004:
         runs-on: ubuntu-20.04
+        if: ${{ false }}
 
         strategy:
             matrix:
@@ -126,7 +127,7 @@ jobs:
                   python-version: 3
 
             - name: Install packages
-              run: homewbrew install geos
+              run: homebrew install geos
               shell: bash
 
             - uses: ./.github/actions/install-dependencies
