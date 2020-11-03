@@ -8,7 +8,7 @@ jobs:
 
         strategy:
             matrix:
-                python-version: [3.5]
+                python-version: [3.5, 3.6, 3.7, 3.8, 3.9]
 
         steps:
             - uses: actions/checkout@v2
@@ -28,8 +28,43 @@ jobs:
               shell: bash
 
             - name: Run tests
-              run: |
-                python --version
-                python run_tests.py
+              run: python run_tests.py
+              shell: bash
+              working-directory: test
+
+
+    build-ubuntu-16.04:
+        runs-on: ubuntu-16.04
+
+        strategy:
+            matrix:
+                compiler: [gcc, clang]
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Install packages
+              run: sudo apt-get install -y -qq libboost-dev libexpat1-dev zlib1g-dev libbz2-dev libproj-dev libgeos-dev
+
+            - uses: ./.github/actions/install-dependencies
+
+            - name: Build package
+              run: python setup.py build
+              shell: bash
+              env:
+                CC: gcc
+                CXX: g++
+              if: {{ matrix.compiler == "gcc" }}
+
+            - name: Build package
+              run: python setup.py build
+              shell: bash
+              env:
+                CC: clang
+                CXX: clang++
+              if: {{ matrix.compiler == "clang" }}
+
+            - name: Run tests
+              run: python run_tests.py
               shell: bash
               working-directory: test
