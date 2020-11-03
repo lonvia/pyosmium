@@ -66,8 +66,8 @@ jobs:
               run: python setup.py build
               shell: bash
               env:
-                CC: clang-6
-                CXX: clang++-6
+                CC: clang-6.0
+                CXX: clang++-6.0
               if: ${{ matrix.compiler == 'clang' }}
 
             - name: Run tests
@@ -124,6 +124,10 @@ jobs:
             - uses: actions/setup-python@v2
               with:
                   python-version: 3
+
+            - name: Install packages
+              run: homewbrew install geos
+              shell: bash
 
             - uses: ./.github/actions/install-dependencies
 
