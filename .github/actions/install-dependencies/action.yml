@@ -5,7 +5,7 @@ runs:
 
     steps:
         - name: Install pip dependencies
-          run: sudo pip3 install -q nose shapely setuptools
+          run: sudo pip install nose shapely setuptools
           shell: bash
 
         - name: Install package dependencies
