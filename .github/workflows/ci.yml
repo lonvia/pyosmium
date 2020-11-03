@@ -3,8 +3,34 @@ name: CI
 on: [ push, pull_request ]
 
 jobs:
-    build:
-        runs-on: ubunut-20.04
+    build-default:
+        runs-on: ubuntu-20.04
+
+        strategy:
+            matrix:
+                python-version: [3.4, 3.5, 3.6, 3.7, 3.8]
 
         steps:
             - uses: actions/checkout@v2
+
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v2
+              with:
+                  python-version: ${{ matrix.python-version }}
+
+            - name: Install dependencies
+              run: |
+                  git clone --quiet --depth 1 https://github.com/osmcode/libosmium.git contrib/libosmium
+                  git clone --quiet --depth 1 https://github.com/mapbox/protozero.git contrib/protozero
+                  git clone --quiet --depth 1 https://github.com/pybind/pybind11.git contrib/pybind11
+                  pip3 install -q nose mock shapely setuptools
+              shell: bash
+
+            - name: Build package
+              run: python3 setup.py build
+              shell: bash
+
+            - name: Run tests
+              run: python3 run_tests.py
+              shell: bash
+              working_directory: test
