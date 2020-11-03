@@ -5,7 +5,7 @@ runs:
 
     steps:
         - name: Install pip dependencies
-          run: pip3 install --user -q nose mock shapely setuptools
+          run: pip3 install --user -q nose setuptools
           shell: bash
 
         - name: Install package dependencies
