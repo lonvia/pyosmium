@@ -92,6 +92,13 @@ jobs:
                 python -m build
               shell: bash
 
+            - name: Set up Pypy 3.10
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "pypy3.10"
+                  allow-prereleases: true
+
+            - name: Build package pypy 3.10
             - name: Upload Artifact
               uses: actions/upload-artifact@v4
               with:
@@ -105,7 +112,48 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                python-version: [3.7, 3.8, 3.9, "3.10", "3.11", "3.12", "3.13"]
+                python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v5
+              with:
+                  python-version: ${{ matrix.python-version }}
+                  allow-prereleases: true
+
+            - uses: actions/download-artifact@v4
+              with:
+                  name: pyosmium-linux-x64-dist
+
+            - name: Install osmium
+              run: |
+                pip install virtualenv
+                virtualenv osmium-test
+                WHEEL=`ls osmium*cp${PYVER/./}*.whl`
+                ./osmium-test/bin/pip install ${WHEEL}[tests]
+              shell: bash
+              env:
+                PYVER: ${{ matrix.python-version }}
+
+            - name: Run tests
+              run: ./osmium-test/bin/pytest test
+              shell: bash
+
+            - name: Check tool availability
+              run: |
+                ./osmium-test/bin/pyosmium-get-changes -h
+                ./osmium-test/bin/pyosmium-up-to-date -h
+
+    test-pypy:
+        runs-on: ubuntu-22.04
+        needs: build-default
+
+        strategy:
+            fail-fast: false
+            matrix:
+                python-version: ["pypy3.10"]
 
         steps:
             - uses: actions/checkout@v4
@@ -138,6 +186,7 @@ jobs:
               run: |
                 ./osmium-test/bin/pyosmium-get-changes -h
                 ./osmium-test/bin/pyosmium-up-to-date -h
+
 
     build-platform:
         runs-on: ${{ matrix.platform }}
