@@ -28,7 +28,7 @@ public:
     {
         m_handlers.reserve(args.size());
         m_python_handlers.reserve(args.size());
-        for (auto &arg: args) {
+        for (auto arg: args) {
             if (py::isinstance<BaseHandler>(arg)) {
                 // Already a handler object, push back directly.
                 m_handlers.push_back(arg.cast<BaseHandler *>());
