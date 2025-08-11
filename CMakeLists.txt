@@ -33,7 +33,7 @@ set(PYBIND11_CPP_STANDARD -std=c++${CMAKE_CXX_STANDARD})
 
 message(STATUS "Building in C++${CMAKE_CXX_STANDARD} mode")
 
-find_package(Python COMPONENTS Interpreter Development)
+find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 
 # Check for abiflags, so we can check for free-threaded later.
 execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys; print(sys.abiflags, end='')"
@@ -48,7 +48,7 @@ else()
     find_package(pybind11 2.9 REQUIRED)
 endif()
 
-find_package(Boost 1.70 REQUIRED COMPONENTS)
+find_package(Boost 1.66 REQUIRED COMPONENTS)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 function(set_module_output module outdir)
