@@ -10,8 +10,11 @@
 
 #include <osmium/io/any_input.hpp>
 #include <osmium/io/any_output.hpp>
+#include <osmium/thread/pool.hpp>
 
 #include <filesystem>
+
+#include "reader.h"
 
 namespace py = pybind11;
 
@@ -21,6 +24,7 @@ class FileBuffer : public osmium::io::File
 {
     using osmium::io::File::File;
 };
+
 
 } // namespace
 
@@ -78,24 +82,24 @@ PYBIND11_MODULE(io, m)
              py::return_value_policy::reference_internal)
     ;
 
-    py::class_<osmium::io::Reader>(m, "Reader")
+    py::class_<pyosmium::ReaderWithPool>(m, "Reader")
         .def(py::init<std::string>())
         .def(py::init<std::string, osmium::osm_entity_bits::type>())
         .def(py::init<>([] (std::filesystem::path const &file) {
-                 return new osmium::io::Reader(file.string());
+                 return new pyosmium::ReaderWithPool(file.string());
              }))
         .def(py::init<>([] (std::filesystem::path const &file, osmium::osm_entity_bits::type etype) {
-                 return new osmium::io::Reader(file.string(), etype);
+                 return new pyosmium::ReaderWithPool(file.string(), etype);
              }))
         .def(py::init<osmium::io::File>(),
              py::keep_alive<1, 2>())
         .def(py::init<osmium::io::File, osmium::osm_entity_bits::type>(),
              py::keep_alive<1, 2>())
-        .def("eof", &osmium::io::Reader::eof)
-        .def("close", &osmium::io::Reader::close)
-        .def("header", &osmium::io::Reader::header)
+        .def("eof", [](pyosmium::ReaderWithPool &self) { return self.reader.eof(); })
+        .def("close", [](pyosmium::ReaderWithPool &self) { self.reader.close(); })
+        .def("header", [](pyosmium::ReaderWithPool &self) { return self.reader.header(); })
         .def("__enter__", [](py::object const &self) { return self; })
-        .def("__exit__", [](osmium::io::Reader &self, py::args args) { self.close(); })
+        .def("__exit__", [](pyosmium::ReaderWithPool &self, py::args args) { self.reader.close(); })
     ;
 
     py::class_<osmium::io::Writer>(m, "Writer")

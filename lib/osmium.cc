@@ -20,6 +20,7 @@
 #include "python_handler.h"
 #include "handler_chain.h"
 #include "buffer_iterator.h"
+#include "reader.h"
 
 #include <vector>
 #include <filesystem>
@@ -93,6 +94,12 @@ PYBIND11_MODULE(_osmium, m)
                      {
                          pyosmium::HandlerChain handler{args};
                          pyosmium::apply(rd, handler);
+                     },
+          py::arg("reader"));
+    m.def("apply", [](pyosmium::ReaderWithPool &rd, py::args args)
+                     {
+                         pyosmium::HandlerChain handler{args};
+                         pyosmium::apply(rd.reader, handler);
                      },
           py::arg("reader"));
     m.def("apply", [](std::string fn, pyosmium::BaseHandler &h)

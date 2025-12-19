@@ -20,6 +20,7 @@
 
 #include "osmium_module.h"
 #include "handler_chain.h"
+#include "reader.h"
 
 namespace py = pybind11;
 
@@ -82,10 +83,10 @@ public:
         changes.clear();
     }
 
-    void apply_to_reader(osmium::io::Reader &reader, osmium::io::Writer &writer,
+    void apply_to_reader(pyosmium::ReaderWithPool &reader, osmium::io::Writer &writer,
                          bool with_history)
     {
-        auto input = osmium::io::make_input_iterator_range<osmium::OSMObject>(reader);
+        auto input = osmium::io::make_input_iterator_range<osmium::OSMObject>(reader.reader);
         if (with_history) {
             // For history files this is a straightforward sort of the change
             // files followed by a merge with the input file.
