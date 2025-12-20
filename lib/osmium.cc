@@ -24,6 +24,8 @@
 #include <vector>
 #include <filesystem>
 
+#include "io.h"
+
 namespace py = pybind11;
 
 void pyosmium::apply_item(osmium::OSMEntity &obj, pyosmium::BaseHandler &handler)
@@ -89,10 +91,10 @@ PYBIND11_MODULE(_osmium, m)
 
     m.def("apply", &pyosmium::apply,
           py::arg("reader"), py::arg("handler"));
-    m.def("apply", [](osmium::io::Reader &rd, py::args args)
+    m.def("apply", [](pyosmium::PyReader &rd, py::args args)
                      {
                          pyosmium::HandlerChain handler{args};
-                         pyosmium::apply(rd, handler);
+                         pyosmium::apply(*rd.get(), handler);
                      },
           py::arg("reader"));
     m.def("apply", [](std::string fn, pyosmium::BaseHandler &h)
