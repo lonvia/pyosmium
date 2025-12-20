@@ -90,8 +90,10 @@ PYBIND11_MODULE(io, m)
         .def(py::init<>([] (std::filesystem::path const &file, osmium::osm_entity_bits::type etype) {
                  return new pyosmium::PyReader(file.string(), etype);
              }))
-        .def(py::init<osmium::io::File const &>())
-        .def(py::init<osmium::io::File const &, osmium::osm_entity_bits::type>())
+        .def(py::init<osmium::io::File const &>(),
+             py::keep_alive<1, 2>())
+        .def(py::init<osmium::io::File const &, osmium::osm_entity_bits::type>(),
+             py::keep_alive<1, 2>())
 
         .def(py::init<std::string, osmium::thread::Pool &>(),
              py::keep_alive<1, 3>())
@@ -107,9 +109,11 @@ PYBIND11_MODULE(io, m)
              }),
              py::keep_alive<1, 4>())
         .def(py::init<osmium::io::File const &, osmium::thread::Pool &>(),
+             py::keep_alive<1, 2>(),
              py::keep_alive<1, 3>())
         .def(py::init<osmium::io::File const &, osmium::osm_entity_bits::type,
                       osmium::thread::Pool &>(),
+             py::keep_alive<1, 2>(),
              py::keep_alive<1, 4>())
 
         .def("eof", [](pyosmium::PyReader const &self) { return self.get()->eof(); })
