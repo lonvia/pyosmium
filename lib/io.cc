@@ -92,6 +92,20 @@ PYBIND11_MODULE(io, m)
              }))
         .def(py::init<osmium::io::File const &>())
         .def(py::init<osmium::io::File const &, osmium::osm_entity_bits::type>())
+
+        .def(py::init<std::string, osmium::thread::Pool &>())
+        .def(py::init<std::string, osmium::osm_entity_bits::type, osmium::thread::Pool &>())
+        .def(py::init<>([] (std::filesystem::path const &file, osmium::thread::Pool &pool) {
+                 return new pyosmium::PyReader(file.string(), pool);
+             }))
+        .def(py::init<>([] (std::filesystem::path const &file,
+                            osmium::osm_entity_bits::type etype, osmium::thread::Pool &pool) {
+                 return new pyosmium::PyReader(file.string(), etype, pool);
+             }))
+        .def(py::init<osmium::io::File const &, osmium::thread::Pool &>())
+        .def(py::init<osmium::io::File const &, osmium::osm_entity_bits::type,
+                      osmium::thread::Pool &>())
+
         .def("eof", [](pyosmium::PyReader const &self) { return self.get()->eof(); })
         .def("close", [](pyosmium::PyReader &self) { self.get()->close(); })
         .def("header", [](pyosmium::PyReader &self) { return self.get()->header(); })
@@ -105,8 +119,24 @@ PYBIND11_MODULE(io, m)
                  return new pyosmium::PyWriter(file.string());
              }))
         .def(py::init<osmium::io::File>())
-        .def(py::init<std::string, osmium::io::Header>())
-        .def(py::init<osmium::io::File, osmium::io::Header>())
+        .def(py::init<std::string, osmium::io::Header const &>())
+        .def(py::init<>([] (std::filesystem::path const &file, osmium::io::Header const &header) {
+                 return new pyosmium::PyWriter(file.string(), header);
+             }))
+        .def(py::init<osmium::io::File, osmium::io::Header const &>())
+
+        .def(py::init<std::string, osmium::thread::Pool &>())
+        .def(py::init<>([] (std::filesystem::path const &file, osmium::thread::Pool &pool) {
+                 return new pyosmium::PyWriter(file.string(), pool);
+             }))
+        .def(py::init<osmium::io::File, osmium::thread::Pool &>())
+        .def(py::init<std::string, osmium::io::Header const &, osmium::thread::Pool &>())
+        .def(py::init<>([] (std::filesystem::path const &file,
+                            osmium::io::Header const &header, osmium::thread::Pool &pool) {
+                 return new pyosmium::PyWriter(file.string(), header, pool);
+             }))
+        .def(py::init<osmium::io::File, osmium::io::Header const &, osmium::thread::Pool &>())
+
         .def("close", [](pyosmium::PyWriter &self) { self.get()->close(); })
     ;
 
