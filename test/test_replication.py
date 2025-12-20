@@ -69,6 +69,7 @@ def test_get_newest_change_from_reader():
         val = osmium.replication.newest_change_from_file(rd)
         assert val == mkdate(2018, 10, 29, 4, 56, 7)
 
+
 def test_get_state_valid(httpserver):
     httpserver.expect_request('/state.txt').respond_with_data("""\
         #Sat Aug 26 11:04:04 UTC 2017
