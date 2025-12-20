@@ -10,6 +10,7 @@
 
 #include <osmium/io/any_input.hpp>
 #include <osmium/io/any_output.hpp>
+#include <osmium/thread/pool.hpp>
 
 #include <filesystem>
 
@@ -31,6 +32,9 @@ PYBIND11_MODULE(io, m, py::mod_gil_not_used())
 PYBIND11_MODULE(io, m)
 #endif
 {
+    // default instance of thread pool to use, bound to life-time of module
+    static osmium::thread::Pool thread_pool{};
+
     py::class_<osmium::io::File>(m, "File")
         .def(py::init<std::string>())
         .def(py::init<std::string, std::string>())
@@ -79,17 +83,25 @@ PYBIND11_MODULE(io, m)
     ;
 
     py::class_<osmium::io::Reader>(m, "Reader")
-        .def(py::init<std::string>())
-        .def(py::init<std::string, osmium::osm_entity_bits::type>())
+        .def(py::init<>([] (std::string file) {
+                 return new osmium::io::Reader(file, thread_pool);
+             }))
+        .def(py::init<>([] (std::string file, osmium::osm_entity_bits::type etype) {
+                 return new osmium::io::Reader(file, etype, thread_pool);
+             }))
         .def(py::init<>([] (std::filesystem::path const &file) {
-                 return new osmium::io::Reader(file.string());
+                 return new osmium::io::Reader(file.string(), thread_pool);
              }))
         .def(py::init<>([] (std::filesystem::path const &file, osmium::osm_entity_bits::type etype) {
-                 return new osmium::io::Reader(file.string(), etype);
+                 return new osmium::io::Reader(file.string(), etype, thread_pool);
              }))
-        .def(py::init<osmium::io::File>(),
+        .def(py::init<>([] (osmium::io::File file) {
+                 return new osmium::io::Reader(file, thread_pool);
+             }),
              py::keep_alive<1, 2>())
-        .def(py::init<osmium::io::File, osmium::osm_entity_bits::type>(),
+        .def(py::init<>([] (osmium::io::File file, osmium::osm_entity_bits::type etype) {
+                 return new osmium::io::Reader(file, etype, thread_pool);
+             }),
              py::keep_alive<1, 2>())
         .def("eof", &osmium::io::Reader::eof)
         .def("close", &osmium::io::Reader::close)
