@@ -311,7 +311,7 @@ class ReplicationServer:
             of = oio.File(outfile, outformat)
 
         of.has_multiple_object_versions = has_history
-        writer = oio.Writer(of, h, thread_pool)
+        writer = oio.Writer(of, header=h, thread_pool=thread_pool)
 
         LOG.debug("Merging changes into OSM file.")
 

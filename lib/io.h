@@ -53,30 +53,15 @@ private:
 class PyWriter
 {
 public:
-    explicit PyWriter(std::string fname)
-    : thread_pool(new osmium::thread::Pool()), writer(fname, *thread_pool) {}
-
-    explicit PyWriter(osmium::io::File const &fname)
-    : thread_pool(new osmium::thread::Pool()), writer(fname, *thread_pool) {}
-
-    PyWriter(std::string fname, osmium::io::Header const &header)
-    : thread_pool(new osmium::thread::Pool()), writer(fname, header, *thread_pool) {}
-
-    PyWriter(osmium::io::File const &fname, osmium::io::Header const &header)
-    : thread_pool(new osmium::thread::Pool()), writer(fname, header, *thread_pool) {}
-
-    PyWriter(std::string fname, osmium::thread::Pool &pool)
-    : writer(fname, pool) {}
-
-    PyWriter(osmium::io::File const &fname, osmium::thread::Pool &pool)
-    : writer(fname, pool) {}
-
-    PyWriter(std::string fname, osmium::io::Header const &header, osmium::thread::Pool &pool)
-    : writer(fname, header, pool) {}
-
-    PyWriter(osmium::io::File const &fname, osmium::io::Header const &header,
-             osmium::thread::Pool &pool)
-    : writer(fname, header, pool) {}
+    PyWriter(osmium::io::File file, osmium::io::Header const *header,
+             bool overwrite, osmium::thread::Pool *pool)
+    : thread_pool(pool ? std::unique_ptr<osmium::thread::Pool>()
+                       : std::make_unique<osmium::thread::Pool>()),
+      writer(std::move(file),
+             header ? *header : osmium::io::Header(),
+             overwrite ? osmium::io::overwrite::allow : osmium::io::overwrite::no,
+             *(pool ? pool : thread_pool.get()))
+    {}
 
     osmium::io::Writer const *get() const { return &writer; }
     osmium::io::Writer *get() { return &writer; }

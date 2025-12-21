@@ -124,34 +124,30 @@ PYBIND11_MODULE(io, m)
     ;
 
     py::class_<pyosmium::PyWriter>(m, "Writer")
-        .def(py::init<std::string>())
-        .def(py::init<>([] (std::filesystem::path const &file) {
-                 return new pyosmium::PyWriter(file.string());
-             }))
-        .def(py::init<osmium::io::File>())
-        .def(py::init<std::string, osmium::io::Header const &>())
-        .def(py::init<>([] (std::filesystem::path const &file, osmium::io::Header const &header) {
-                 return new pyosmium::PyWriter(file.string(), header);
-             }))
-        .def(py::init<osmium::io::File, osmium::io::Header const &>())
-
-        .def(py::init<std::string, osmium::thread::Pool &>(),
-             py::keep_alive<1, 3>())
-        .def(py::init<>([] (std::filesystem::path const &file, osmium::thread::Pool &pool) {
-                 return new pyosmium::PyWriter(file.string(), pool);
-             }),
-             py::keep_alive<1, 3>())
-        .def(py::init<osmium::io::File, osmium::thread::Pool &>(),
-             py::keep_alive<1, 3>())
-        .def(py::init<std::string, osmium::io::Header const &, osmium::thread::Pool &>(),
-             py::keep_alive<1, 4>())
-        .def(py::init<>([] (std::filesystem::path const &file,
-                            osmium::io::Header const &header, osmium::thread::Pool &pool) {
-                 return new pyosmium::PyWriter(file.string(), header, pool);
-             }),
-             py::keep_alive<1, 4>())
-        .def(py::init<osmium::io::File, osmium::io::Header const &, osmium::thread::Pool &>(),
-             py::keep_alive<1, 4>())
+        .def(py::init<osmium::io::File, osmium::io::Header const *, bool, osmium::thread::Pool *>(),
+             py::keep_alive<1, 4>(),
+             py::arg("file"),
+             py::arg("header") = nullptr,
+             py::arg("overwrite") = false,
+             py::arg("thread_pool") = nullptr)
+        .def(py::init<>([] (std::filesystem::path const &file, osmium::io::Header const *header,
+                            bool overwrite, osmium::thread::Pool *pool)
+                        { return new pyosmium::PyWriter(osmium::io::File(file.string()),
+                                                        header, overwrite, pool); }),
+             py::keep_alive<1, 4>(),
+             py::arg("file"),
+             py::arg("header") = nullptr,
+             py::arg("overwrite") = false,
+             py::arg("thread_pool") = nullptr)
+        .def(py::init<>([] (std::string filename, osmium::io::Header const *header,
+                            bool overwrite, osmium::thread::Pool *pool)
+                        { return new pyosmium::PyWriter(osmium::io::File(std::move(filename)),
+                                                        header, overwrite, pool); }),
+             py::keep_alive<1, 4>(),
+             py::arg("file"),
+             py::arg("header") = nullptr,
+             py::arg("overwrite") = false,
+             py::arg("thread_pool") = nullptr)
 
         .def("close", [](pyosmium::PyWriter &self) { self.get()->close(); })
     ;

@@ -192,23 +192,26 @@ class Reader:
 
 class Writer:
     """ Low-level object for writing OSM data into a file. This class does not
-        expose functions for receiving data to be written. Have a look at
-        [SimpleWriter][osmium.SimpleWriter] for a higher-level interface
-        for writing data.
+        expose functions for receiving data to be written. It is mainly useful
+        when more fine-grained control over the write process is required,
+        for example, when using a custom thread pool.
+
+        Have a look at [SimpleWriter][osmium.SimpleWriter] for a higher-level
+        interface for writing data.
     """
     @overload
-    def __init__(self, ffile: Union[str, 'os.PathLike[str]', File],
-                 thread_pool: ThreadPool = ...) -> None:
-        ...
-    @overload
-    def __init__(self, ffile: Union[str, 'os.PathLike[str]', File],
-                 header: Header = ...,
-                 thread_pool: ThreadPool = ...) -> None:
+    def __init__(self, file: Union[str, 'os.PathLike[str]', File],
+                 header: Header = None,
+                 overwrite: bool = False,
+                 thread_pool: ThreadPool = None) -> None:
         """ Create a new Writer. The output may either be a simple filename
             or a [File][osmium.io.File] object. A custom [Header][osmium.io.Header]
             object may be given, to customize the global file information that
             is written out. Be aware that not all file formats support writing
             out all header information.
+
+            pyosmium will refuse to overwrite to existing files by default.
+            Set 'overwrite' to True to allow overwriting.
 
             The writer implicitly creates a private
             [ThreadPool][osmium.io.ThreadPool] which it
