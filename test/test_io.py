@@ -78,8 +78,7 @@ def test_reader_with_filebuffer():
 
 
 def test_reader_with_separate_thread_pool(test_data):
-    pool = osmium.io.ThreadPool()
-    with osmium.io.Reader(test_data('n1 x1 y1'), pool) as rd:
+    with osmium.io.Reader(test_data('n1 x1 y1'), thread_pool=osmium.io.ThreadPool()) as rd:
         for obj in osmium.OsmFileIterator(rd):
             assert obj.id == 1
 

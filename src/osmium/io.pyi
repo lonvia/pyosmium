@@ -4,7 +4,7 @@
 #
 # Copyright (C) 2025 Sarah Hoffmann <lonvia@denofr.de> and others.
 # For a full list of authors see the git log.
-from typing import Any, Union, overload
+from typing import Any, Union, Optional
 import os
 from typing_extensions import Buffer
 
@@ -138,17 +138,12 @@ class Reader:
         A Reader does not expose functions to process the data it has read
         from the file. Use [apply][osmium.apply] for that purpose.
     """
-    @overload
     def __init__(self, filename: Union[str, 'os.PathLike[str]', FileBuffer, File],
-                 thread_pool: ThreadPool = ...) -> None:
-        ...
-    @overload
-    def __init__(self, filename: Union[str, 'os.PathLike[str]', FileBuffer, File],
-                 types: osm_entity_bits = ...,
-                 thread_pool: ThreadPool = ...) -> None:
+                 types: Optional[osm_entity_bits] = None,
+                 thread_pool: Optional[ThreadPool] = None) -> None:
         """ Create a new reader object. The input may either be
             a filename or a [File][osmium.io.File] or
-            [FileBuffer][osmium.io.FileBuffer] object. The _types_ parameter
+            [FileBuffer][osmium.io.FileBuffer] object. The 'types' parameter
             defines which kinds of objects will be read from the input. Any
             types not present will be skipped completely when reading the
             file. Depending on the type of input, this can save quite a bit
@@ -168,8 +163,6 @@ class Reader:
             `close()` function will be called automatically when the
             reader leaves the scope.
         """
-
-
 
     def close(self) -> None:
         """ Close any open file handles and free all resources. The
@@ -199,11 +192,10 @@ class Writer:
         Have a look at [SimpleWriter][osmium.SimpleWriter] for a higher-level
         interface for writing data.
     """
-    @overload
     def __init__(self, file: Union[str, 'os.PathLike[str]', File],
-                 header: Header = None,
+                 header: Optional[Header] = None,
                  overwrite: bool = False,
-                 thread_pool: ThreadPool = None) -> None:
+                 thread_pool: Optional[ThreadPool] = None) -> None:
         """ Create a new Writer. The output may either be a simple filename
             or a [File][osmium.io.File] object. A custom [Header][osmium.io.Header]
             object may be given, to customize the global file information that

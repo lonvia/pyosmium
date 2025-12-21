@@ -289,7 +289,7 @@ class ReplicationServer:
             return None
 
         thread_pool = oio.ThreadPool()
-        reader = oio.Reader(infile, thread_pool)
+        reader = oio.Reader(infile, thread_pool=thread_pool)
         has_history = reader.header().has_multiple_object_versions
 
         h = oio.Header()

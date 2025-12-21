@@ -17,29 +17,14 @@ namespace pyosmium {
 class PyReader
 {
 public:
-    explicit PyReader(std::string fname)
-    : thread_pool(new osmium::thread::Pool()), reader(fname, *thread_pool) {}
-
-    explicit PyReader(osmium::io::File const &fname)
-    : thread_pool(new osmium::thread::Pool()), reader(fname, *thread_pool) {}
-
-    PyReader(std::string fname, osmium::osm_entity_bits::type etype)
-    : thread_pool(new osmium::thread::Pool()), reader(fname, etype, *thread_pool) {}
-
-    PyReader(osmium::io::File const &fname, osmium::osm_entity_bits::type etype)
-    : thread_pool(new osmium::thread::Pool()), reader(fname, *thread_pool) {}
-
-    PyReader(std::string fname, osmium::thread::Pool &pool)
-    : reader(fname, pool) {}
-
-    PyReader(osmium::io::File const &fname, osmium::thread::Pool &pool)
-    : reader(fname, pool) {}
-
-    PyReader(std::string fname, osmium::osm_entity_bits::type etype, osmium::thread::Pool &pool)
-    : reader(fname, etype, pool) {}
-
-    PyReader(osmium::io::File const &fname, osmium::osm_entity_bits::type etype, osmium::thread::Pool &pool)
-    : reader(fname, etype, pool) {}
+    PyReader(osmium::io::File fname, osmium::osm_entity_bits::type const *etype,
+             osmium::thread::Pool *pool)
+    : thread_pool(pool ? std::unique_ptr<osmium::thread::Pool>()
+                       : std::make_unique<osmium::thread::Pool>()),
+      reader(std::move(fname),
+             etype ? *etype : osmium::osm_entity_bits::all,
+             *(pool ? pool : thread_pool.get()))
+    {}
 
     osmium::io::Reader const *get() const { return &reader; }
     osmium::io::Reader *get() { return &reader; }

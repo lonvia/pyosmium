@@ -65,7 +65,7 @@ def test_get_newest_change_from_reader():
         'n6365 v1 t2018-10-29T03:56:07Z x1 y7\n'
         'n6366 v1 t2018-10-29T04:56:07Z x1 y7\n'.encode('utf-8'), 'opl')
 
-    with osmium.io.Reader(fb, osmium.io.ThreadPool()) as rd:
+    with osmium.io.Reader(fb, thread_pool=osmium.io.ThreadPool()) as rd:
         val = osmium.replication.newest_change_from_file(rd)
         assert val == mkdate(2018, 10, 29, 4, 56, 7)
 
