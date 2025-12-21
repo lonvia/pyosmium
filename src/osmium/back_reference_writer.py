@@ -10,7 +10,7 @@ from tempfile import TemporaryDirectory
 import os
 
 from osmium._osmium import SimpleWriter
-from osmium.io import File, FileBuffer, ThreadPool, Writer
+from osmium.io import File, FileBuffer, ThreadPool
 from osmium.file_processor import FileProcessor, zip_processors
 from osmium import IdTracker
 
@@ -112,7 +112,7 @@ class BackReferenceWriter:
         fp1 = FileProcessor(Path(self.tmpdir.name, 'back_writer.osm.pbf'),
                             thread_pool=self.thread_pool)
         fp2 = FileProcessor(self.ref_src, thread_pool=self.thread_pool)\
-                .with_filter(self.id_tracker.id_filter())
+            .with_filter(self.id_tracker.id_filter())
 
         with SimpleWriter(self.outfile, overwrite=self.overwrite,
                           thread_pool=self.thread_pool) as writer:

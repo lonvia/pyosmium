@@ -123,8 +123,8 @@ class ForwardReferenceWriter:
 
             fp1 = FileProcessor(Path(self.tmpdir.name, 'forward_writer.osm.pbf'),
                                 thread_pool=self.thread_pool)
-            fp2 = FileProcessor(self.ref_src,
-                                thread_pool=self.thread_pool).with_filter(self.id_tracker.id_filter())
+            fp2 = FileProcessor(self.ref_src, thread_pool=self.thread_pool)\
+                .with_filter(self.id_tracker.id_filter())
 
             with SimpleWriter(self.outfile, overwrite=self.overwrite,
                               thread_pool=self.thread_pool) as writer:

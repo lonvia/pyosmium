@@ -10,7 +10,7 @@ import os
 from .osm import osm_entity_bits
 from .osm.types import OSMEntity
 from .index import LocationTable, IdSet
-from .io import Reader, Writer, Header, File, FileBuffer
+from .io import Reader, Writer, Header, File, FileBuffer, ThreadPool
 
 # Placeholder for more narrow type definition to come
 HandlerLike = object
@@ -149,11 +149,6 @@ class SimpleWriter(BaseHandler):
             size is 4MB. Larger buffers are normally better but you should
             be aware that there are normally multiple buffers in use during
             the write process.
-
-            You may use an externally created Writer object for the simple
-            writer. Be aware that by default the underlying writer is closed,
-            when the SimpleWriter is closed. If you don't want that behaviour,
-            then you n
         """
     def add_node(self, node: object) -> None:
         """ Add a new node to the file. The node may be a
