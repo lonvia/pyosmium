@@ -2,9 +2,9 @@
 #
 # This file is part of pyosmium. (https://osmcode.org/pyosmium/)
 #
-# Copyright (C) 2024 Sarah Hoffmann <lonvia@denofr.de> and others.
+# Copyright (C) 2025 Sarah Hoffmann <lonvia@denofr.de> and others.
 # For a full list of authors see the git log.
-from typing import ByteString, Union, Optional, Any
+from typing import ByteString, Union, Optional, Any, overload
 import os
 
 from .osm import osm_entity_bits
@@ -126,10 +126,14 @@ class SimpleWriter(BaseHandler):
         don't use it in a `with` context, don't forget to call `close()`,
         when writing is finished.
     """
+    @overload
+    def __init__(self, writer: Writer, bufsz: int=4096*1024) -> None:
+        ...
+    @overload
     def __init__(self, file: Union[str, 'os.PathLike[str]', File],
-                 bufsz: int= ...,
-                 header: Optional[Header]= ..., overwrite: bool= ...,
-                 filetype: str= ...) -> None:
+                 bufsz: int=4096*1024,
+                 header: Optional[Header]= None, overwrite: bool=False,
+                 filetype: str="") -> None:
         """ Initiate a new writer for the given file. The writer will
             refuse to overwrite an already existing file unless _overwrite_
             is explicitly set to `True`.

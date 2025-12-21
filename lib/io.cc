@@ -119,7 +119,7 @@ PYBIND11_MODULE(io, m)
 
     py::class_<pyosmium::PyWriter>(m, "Writer")
         .def(py::init<osmium::io::File, osmium::io::Header const *, bool, osmium::thread::Pool *>(),
-             py::keep_alive<1, 4>(),
+             py::keep_alive<1, 5>(),
              py::arg("file"),
              py::arg("header") = nullptr,
              py::arg("overwrite") = false,
@@ -128,7 +128,7 @@ PYBIND11_MODULE(io, m)
                             bool overwrite, osmium::thread::Pool *pool)
                         { return new pyosmium::PyWriter(osmium::io::File(file.string()),
                                                         header, overwrite, pool); }),
-             py::keep_alive<1, 4>(),
+             py::keep_alive<1, 5>(),
              py::arg("file"),
              py::arg("header") = nullptr,
              py::arg("overwrite") = false,
@@ -137,7 +137,7 @@ PYBIND11_MODULE(io, m)
                             bool overwrite, osmium::thread::Pool *pool)
                         { return new pyosmium::PyWriter(osmium::io::File(std::move(filename)),
                                                         header, overwrite, pool); }),
-             py::keep_alive<1, 4>(),
+             py::keep_alive<1, 5>(),
              py::arg("file"),
              py::arg("header") = nullptr,
              py::arg("overwrite") = false,
