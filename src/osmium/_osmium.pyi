@@ -4,7 +4,7 @@
 #
 # Copyright (C) 2025 Sarah Hoffmann <lonvia@denofr.de> and others.
 # For a full list of authors see the git log.
-from typing import ByteString, Union, Optional, Any, overload
+from typing import ByteString, Union, Optional, Any
 import os
 
 from .osm import osm_entity_bits
@@ -126,14 +126,10 @@ class SimpleWriter(BaseHandler):
         don't use it in a `with` context, don't forget to call `close()`,
         when writing is finished.
     """
-    @overload
-    def __init__(self, writer: Writer, bufsz: int=4096*1024) -> None:
-        ...
-    @overload
     def __init__(self, file: Union[str, 'os.PathLike[str]', File],
                  bufsz: int=4096*1024,
                  header: Optional[Header]= None, overwrite: bool=False,
-                 filetype: str="") -> None:
+                 filetype: str="", thread_pool: Optional[ThreadPool]=None) -> None:
         """ Initiate a new writer for the given file. The writer will
             refuse to overwrite an already existing file unless _overwrite_
             is explicitly set to `True`.
@@ -153,6 +149,11 @@ class SimpleWriter(BaseHandler):
             size is 4MB. Larger buffers are normally better but you should
             be aware that there are normally multiple buffers in use during
             the write process.
+
+            You may use an externally created Writer object for the simple
+            writer. Be aware that by default the underlying writer is closed,
+            when the SimpleWriter is closed. If you don't want that behaviour,
+            then you n
         """
     def add_node(self, node: object) -> None:
         """ Add a new node to the file. The node may be a

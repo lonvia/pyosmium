@@ -31,17 +31,10 @@ class SimpleWriter : public pyosmium::BaseHandler
     enum { BUFFER_WRAP = 4096 };
 
 public:
-    SimpleWriter(osmium::io::File file, size_t bufsz, osmium::io::Header const *header,
-                 bool overwrite)
-    : internal_writer(std::make_unique<pyosmium::PyWriter>(file, header, overwrite, nullptr)),
-      writer(internal_writer->get()),
-      buffer(bufsz < 2 * BUFFER_WRAP ? 2 * BUFFER_WRAP : bufsz,
-             osmium::memory::Buffer::auto_grow::yes),
-      buffer_size(buffer.capacity()) // same rounding to BUFFER_WRAP
-    {}
-
-    SimpleWriter(pyosmium::PyWriter &w, size_t bufsz)
-    : writer(w.get()),
+    SimpleWriter(osmium::io::File file, unsigned long bufsz,
+                 osmium::io::Header const *header, bool overwrite,
+                 osmium::thread::Pool *pool)
+    : writer(file, header, overwrite, pool),
       buffer(bufsz < 2 * BUFFER_WRAP ? 2 * BUFFER_WRAP : bufsz,
              osmium::memory::Buffer::auto_grow::yes),
       buffer_size(buffer.capacity()) // same rounding to BUFFER_WRAP
@@ -152,11 +145,9 @@ public:
     void close()
     {
         if (buffer) {
-            (*writer)(std::move(buffer));
+            (*writer.get())(std::move(buffer));
+            writer.get()->close();
             buffer = osmium::memory::Buffer();
-        }
-        if (internal_writer) {
-            internal_writer->get()->close();
         }
     }
 
@@ -335,12 +326,11 @@ private:
             osmium::memory::Buffer new_buffer(buffer_size, osmium::memory::Buffer::auto_grow::yes);
             using std::swap;
             swap(buffer, new_buffer);
-            (*writer)(std::move(new_buffer));
+            (*writer.get())(std::move(new_buffer));
         }
     }
 
-    std::unique_ptr<pyosmium::PyWriter> internal_writer;
-    osmium::io::Writer *writer;
+    pyosmium::PyWriter writer;
     osmium::memory::Buffer buffer;
     size_t buffer_size;
 };
@@ -354,31 +344,37 @@ void init_simple_writer(pybind11::module &m)
     py::class_<SimpleWriter, BaseHandler>(m, "SimpleWriter")
         .def(py::init<>([] (std::string file, unsigned long bufsz,
                             osmium::io::Header const *header, bool overwrite,
-                            std::string filetype) {
-                 return new SimpleWriter(osmium::io::File(std::move(file), std::move(filetype)),
-                                         bufsz, header, overwrite);
-             }),
+                            std::string filetype,
+                            osmium::thread::Pool *pool) {
+                          return new SimpleWriter(osmium::io::File(std::move(file), std::move(filetype)),
+                                                  bufsz, header, overwrite, pool);
+                        }),
+             py::keep_alive<1, 7>(),
              py::arg("filename"), py::arg("bufsz") = 4096*1024,
              py::arg("header") = nullptr,
              py::arg("overwrite") = false,
-             py::arg("filetype") = "")
+             py::arg("filetype") = "",
+             py::arg("thread_pool") = nullptr)
         .def(py::init<>([] (std::filesystem::path const &file, unsigned long bufsz,
                             osmium::io::Header const *header, bool overwrite,
-                            std::string filetype) {
-                 return new SimpleWriter(osmium::io::File(file.string(), std::move(filetype)),
-                                         bufsz, header, overwrite);
-             }),
+                            std::string filetype,
+                            osmium::thread::Pool *pool) {
+                          return new SimpleWriter(osmium::io::File(file.string(), std::move(filetype)),
+                                                  bufsz, header, overwrite, pool);
+                        }),
+             py::keep_alive<1, 7>(),
              py::arg("filename"), py::arg("bufsz") = 4096*1024,
              py::arg("header") = nullptr,
              py::arg("overwrite") = false,
-             py::arg("filetype") = "")
-        .def(py::init<osmium::io::File, unsigned long, osmium::io::Header const *, bool>(),
+             py::arg("filetype") = "",
+             py::arg("thread_pool") = nullptr)
+        .def(py::init<osmium::io::File, unsigned long, osmium::io::Header const *,
+                      bool, osmium::thread::Pool *>(),
+             py::keep_alive<1, 6>(),
              py::arg("filename"), py::arg("bufsz") = 4096*1024,
              py::arg("header") = nullptr,
-             py::arg("overwrite") = false)
-        .def(py::init<pyosmium::PyWriter &, unsigned long>(),
-             py::keep_alive<1, 2>(),
-             py::arg("writer"), py::arg("bufsz") = 4096*1024)
+             py::arg("overwrite") = false,
+             py::arg("thread_pool") = nullptr)
         .def("add_node", &SimpleWriter::add_node, py::arg("node"))
         .def("add_way", &SimpleWriter::add_way, py::arg("way"))
         .def("add_relation", &SimpleWriter::add_relation, py::arg("relation"))

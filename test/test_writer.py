@@ -375,10 +375,8 @@ def test_write_to_file(tmp_path):
         writer.add_node(osmium.osm.mutable.Node(id=123))
 
 
-def test_write_to_writer(tmp_path):
+def test_write_with_pool(tmp_path):
     test_file = tmp_path / f"{uuid.uuid4()}.opl"
 
-    w = osmium.io.Writer(test_file, thread_pool=osmium.io.ThreadPool())
-
-    with osmium.SimpleWriter(w, bufsz=400) as writer:
+    with osmium.SimpleWriter(test_file, bufsz=400, thread_pool=osmium.io.ThreadPool()) as writer:
         writer.add_node(osmium.osm.mutable.Node(id=123))
