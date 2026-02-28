@@ -54,6 +54,23 @@ namespace {
 
     };
 
+struct object_order_diff_update_simplified {
+
+    bool operator()(const osmium::OSMObject& lhs, const osmium::OSMObject& rhs) const noexcept {
+        return const_tie(lhs.type(), lhs.id() > 0, lhs.positive_id(), rhs.version(),
+                    ((lhs.timestamp().valid() && rhs.timestamp().valid()) ? rhs.timestamp() : osmium::Timestamp())) <
+               const_tie(rhs.type(), rhs.id() > 0, rhs.positive_id(), lhs.version(),
+                    ((lhs.timestamp().valid() && rhs.timestamp().valid()) ? lhs.timestamp() : osmium::Timestamp()));
+    }
+
+    /// @pre lhs and rhs must not be nullptr
+    bool operator()(const osmium::OSMObject* lhs, const osmium::OSMObject* rhs) const noexcept {
+        assert(lhs && rhs);
+        return operator()(*lhs, *rhs);
+    }
+
+};
+
 
 
 class MergeInputReader
@@ -63,7 +80,7 @@ public:
     {
         pyosmium::HandlerChain handler{args};
         if (simplify) {
-            objects.sort(osmium::object_order_type_id_reverse_version());
+            objects.sort(object_order_diff_update_simplified());
             osmium::item_type prev_type = osmium::item_type::undefined;
             osmium::object_id_type prev_id = 0;
             for (auto &item: objects) {
@@ -110,7 +127,7 @@ public:
             // sure it appears first in the objects vector before doing the
             // stable sort.
             std::reverse(objects.ptr_begin(), objects.ptr_end());
-            objects.sort(osmium::object_order_type_id_reverse_version());
+            objects.sort(object_order_diff_update_simplified());
 
             copy_first_with_id copy_first{*writer.get()};
             auto output_it = std::back_inserter(copy_first);
@@ -120,7 +137,7 @@ public:
                     input.begin(),
                     input.end(),
                     output_it,
-                    osmium::object_order_type_id_reverse_version());
+                    object_order_diff_update_simplified());
         }
     }
 

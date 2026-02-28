@@ -70,6 +70,15 @@ class BufferIterator:
 class MergeInputReader:
     """ Buffer which collects data from multiple input files, sorts it
         and optionally deduplicates the data before applying to a handler.
+
+        Some care must be taken, when using this merging reader with diffs
+        created by computing the difference between files, e.g. with diff files
+        from extract services like Geofabrik. These diff files can contain
+        artificial creation and deletion operations when an object moves in
+        or out of the extract. This merging reader handles correctly the case
+        where a diff is applied to a file. However, when merging multiple
+        diffs together, for example from different extracts, the result may
+        contain bogus create or delete operations.
     """
     def __init__(self) -> None:
         """ Initialize a new reader.
