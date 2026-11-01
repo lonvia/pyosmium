@@ -322,8 +322,8 @@ jobs:
                       deps: develop
                       flavour: macos
                     - compiler: macos-arm
-                      platform: macos-14
-                      python: "3.14"
+                      platform: macos-26
+                      python: "3.15"
                       deps: develop
                       flavour: macos
 
